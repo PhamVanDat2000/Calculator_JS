@@ -50,10 +50,11 @@ button{
 button:hover{
 	cursor: pointer;
 }
-.buttons .button-type1{
-	background-color: #555556;
+.buttons .gray{
+	background-color: #555556 !important;
 }
-.buttons .operator{
+.buttons .orange,
+.equal{
 	background-color:#f3a33c;
 	font-size: 40px;
 }

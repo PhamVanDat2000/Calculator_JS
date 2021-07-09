@@ -1,90 +1,122 @@
 //screen
 var historyMath = document.querySelector(".history-math p")
 var result = document.querySelector(".showresult h1")
-// buttons selector
+// button
 var clear = document.querySelector(".clear")
 var change = document.querySelector(".change-sign")
-var mod = document.querySelector(".mod")
-var div = document.querySelector(".div")
-var seven = document.querySelector(".seven")
-var eight = document.querySelector(".eight")
-var nine = document.querySelector(".nine")
-var mul = document.querySelector(".mul")
-var four = document.querySelector(".four")
-var five = document.querySelector(".five")
-var six = document.querySelector(".six")
-var minus = document.querySelector(".minus")
-var one = document.querySelector(".one")
-var two = document.querySelector(".two")
-var three = document.querySelector(".three")
-var add = document.querySelector(".add")
-var zero = document.querySelector(".zero")
-var dot = document.querySelector(".dot")
+var numberArr = document.querySelectorAll(".number")
+var operatorArr = document.querySelectorAll(".operator")
 var equal = document.querySelector(".equal")
 
-var numberArr = [one, two, three, four, five, six, seven, eight, nine, zero, dot]
-var operatorArr = [mod, div, mul, minus, add, equal]
-
-var endChar = "number";
-
+var binComplete = false // true : du 2 toan tu va 1 toan hang
+var op = false // true neu co 1 toan hang
 // Clear
 function clearAll() {
 	historyMath.innerHTML = "";
 	result.innerHTML = "";
-	endChar = "number";
+	binComplete = false
+	op = false
 }
-// Change sign
-function changeSign() {
-	if (historyMath.innerHTML == "" ) {
-		result.innerHTML = "Syntax is wrong";
-	}
-	else {
-		result.innerHTML = eval(result.innerHTML) * -1;
-	}
-}
-// Number event
+
 function clickNumber() {
-	if (endChar === "equal") {
-		historyMath.innerHTML = this.name;
+	if(result.innerHTML ==="" && this.name ==="%") return
+	if (this.name === '.' && result.innerHTML.includes('.')) {
+		return
+	}
+	else if (result.innerHTML.slice(-1) === "%" && !op) {
+		return
+	}
+	else if (historyMath.innerHTML.includes('=')) {
+		if (this.name === "%") {
+		 result.innerHTML += this.name
+		}
+		else result.innerHTML = this.name
+	}
+	else if (op) { // nếu có toán tử + - * / %
+		if (this.name === "%") return
+		result.innerHTML = this.name
+		binComplete = true
 	}
 	else {
-		historyMath.innerHTML = historyMath.innerHTML + this.name;
+		result.innerHTML = result.innerHTML + this.name
 	}
-	endChar = "number"
+	op = false
 }
-// Operator event
 function clickOperator() {
-	console.log(eval(""))
-	if (this === equal) {
-		if (endChar == "operator" || historyMath.innerHTML=="") {
-			result.innerHTML = "Syntax is wrong"
+	if(result.innerHTML === "") return
+	if (!binComplete) { // nếu biểu thức chưa hoàn tất
+		if (op) { // nếu có toán tử thì sửa lại thành toán tử this
+			if (this.name === "=") return
+			temp = historyMath.innerHTML
+			historyMath.innerHTML = temp.substring(0, temp.length - 1) + this.name
 		}
-		else if (endChar == "number"){
-			result.innerHTML = eval(historyMath.innerHTML);
-			historyMath.innerHTML = historyMath.innerHTML + this.name;
+		else { // nếu chưa có toán tử thì append vào
+			if (this.name === "="){
+				if(result.innerHTML.includes("%")){
+					var temp = result.innerHTML
+					result.innerHTML = temp.substring(0, temp.length-1) /100
+
+				}
+				historyMath.innerHTML = result.innerHTML + this.name
+			}
+			historyMath.innerHTML = result.innerHTML + this.name
+			op = true
 		}
-		endChar = "equal"
 	}
-	else if (historyMath.innerHTML == "") {
-		historyMath.innerHTML = "0" + this.name;
-		endChar = "operator"
+	else {	// nếu biểu thức hoàn tất
+		var res = calculate(historyMath.innerHTML, result.innerHTML)
+		if (this.name === "=") {
+			historyMath.innerHTML += result.innerHTML + this.name
+			result.innerHTML = res;
+			op = false
+		}
+		else {
+			result.innerHTML = res;
+			historyMath.innerHTML = result.innerHTML + this.name;
+			op = true
+		}
 	}
-	else if (endChar == "number") {
-		historyMath.innerHTML = historyMath.innerHTML + this.name;
-		endChar = "operator"
+	binComplete = false
+}
+
+function changeSign() {
+	temp = result.innerHTML
+	if(result.innerHTML === "") return
+	if (op) return
+	else if (result.innerHTML.includes("%")){
+		result.innerHTML = temp.substring(0, temp.length-1) * -1 + "%"
 	}
-	else if (endChar == "operator") {
-		len = historyMath.innerHTML.length
-		historyMath.innerHTML = historyMath.innerHTML.substring(0, len - 1) + this.name;
-		endChar = "operator"
-	}
-	else if (endChar = "equal") {
-		historyMath.innerHTML = result.innerHTML + this.name;
-		endChar = "operator"
+	else {
+		result.innerHTML = result.innerHTML * -1
 	}
 }
+function calculate(a, b) {
+	var x = parseFloat(a)
+	var y = parseFloat(b)
+	check = a.slice(-1)
+	if (a.slice(-2, -1) == "%") {
+		x = parseFloat(a) / 100
+	}
+	if (b.slice(-1) == "%") {
+		y = parseFloat(b) / 100
+	}
+	switch (check) {
+		case "+":
+			return x + y
+		case "-":
+			return x - y
+		case "*":
+			return x * y
+		case "/":
+			return x / y
+		default:
+			return
+	}
+}
+
 // add event
 clear.addEventListener('click', clearAll)
 change.addEventListener('click', changeSign)
 numberArr.forEach(elem => elem.addEventListener("click", clickNumber))
+operatorArr.forEach(elem => elem.addEventListener("click", clickOperator))
 operatorArr.forEach(elem => elem.addEventListener("click", clickOperator))

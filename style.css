@@ -15,7 +15,6 @@ body{
 	border-radius: 16px;
 	overflow:hidden;
 }
-
 .screen{
 	height: 150px;
 }
@@ -46,8 +45,6 @@ button{
 	height: 80px;
 	color: aliceblue;
 	font-size: 30px;
-}
-button:hover{
 	cursor: pointer;
 }
 .buttons .gray{
